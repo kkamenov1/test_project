@@ -11,4 +11,7 @@ class _User {
 
   @Column()
   String password;
+
+  @Column()
+  String salt;
 }

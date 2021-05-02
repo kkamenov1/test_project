@@ -32,7 +32,7 @@ class TestProjectChannel extends ApplicationChannel {
   Controller get entryPoint {
     final router = Router();
 
-    router.route("/register").link(() => UserController());
+    router.route("/register").link(() => UserController(context));
     return router;
   }
 }
