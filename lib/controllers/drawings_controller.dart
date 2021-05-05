@@ -7,29 +7,34 @@ class DrawingsController extends ResourceController {
 
   final ManagedContext context;
 
-  @Operation.post('userId')
-  Future<Response> addDrawing(
-      @Bind.body() Drawing body, @Bind.path('userId') int userId) async {
+  @Operation.post()
+  Future<Response> addDrawing(@Bind.body() Drawing body) async {
+    final userId = request.authorization.ownerID;
+
     final drawingQuery = Query<Drawing>(context)
       ..values.points = body.points
       ..values.userId = userId;
+
     final insertedDrawing = await drawingQuery.insert();
     return Response.ok(insertedDrawing);
   }
 
-  @Operation.get('userId')
-  Future<Response> getAllDrawingsForUser(
-      @Bind.path('userId') int userId) async {
+  @Operation.get()
+  Future<Response> getAllDrawingsForUser() async {
+    final userId = request.authorization.ownerID;
+
     final drawingQuery = Query<Drawing>(context)
-      ..where((drawing) => drawing.userId).equalTo(userId);
+      ..where((drawing) => drawing.userId).identifiedBy(userId);
+
     return Response.ok(await drawingQuery.fetch());
   }
 
-  @Operation.delete('userId', 'drawingId')
-  Future<Response> deleteDrawing(@Bind.path('userId') int userId,
-      @Bind.path('drawingId') int drawingId) async {
+  @Operation.delete('drawingId')
+  Future<Response> deleteDrawing(@Bind.path('drawingId') int drawingId) async {
+    final userId = request.authorization.ownerID;
+
     final drawingQuery = Query<Drawing>(context)
-      ..where((drawing) => drawing.userId).equalTo(userId)
+      ..where((drawing) => drawing.userId).identifiedBy(userId)
       ..where((drawing) => drawing.id).equalTo(drawingId);
     final deletedCount = await drawingQuery.delete();
 

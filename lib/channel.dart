@@ -45,7 +45,8 @@ class TestProjectChannel extends ApplicationChannel {
         .link(() => RegisterController(context, authServer));
 
     router
-        .route('/drawings/:userId/[:drawingId]')
+        .route('/drawings/[:drawingId]')
+        .link(() => Authorizer.bearer(authServer))
         .link(() => DrawingsController(context));
     return router;
   }
