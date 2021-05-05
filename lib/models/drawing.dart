@@ -7,5 +7,8 @@ class _Drawing {
   int id;
 
   @Column()
+  int userId;
+
+  @Column()
   String points;
 }
