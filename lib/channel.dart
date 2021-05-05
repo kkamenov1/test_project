@@ -1,4 +1,7 @@
-import 'package:test_project/controllers/user.dart';
+import 'package:aqueduct/managed_auth.dart';
+import 'package:test_project/controllers/register_controller.dart';
+import 'package:test_project/controllers/drawings_controller.dart';
+import 'package:test_project/models/user.dart';
 import 'test_project.dart';
 
 /// This type initializes an application.
@@ -7,6 +10,7 @@ import 'test_project.dart';
 /// database connections. See http://aqueduct.io/docs/http/channel/.
 class TestProjectChannel extends ApplicationChannel {
   ManagedContext context;
+  AuthServer authServer;
 
   /// This method is invoked prior to [entryPoint] being accessed.
   @override
@@ -17,9 +21,11 @@ class TestProjectChannel extends ApplicationChannel {
     // connecting to PostgreSQL
     final dataModel = ManagedDataModel.fromCurrentMirrorSystem();
     final persistentStore = PostgreSQLPersistentStore.fromConnectionInfo(
-        'admin', 'admin', 'localhost', 5432, 'test_project');
+        'test_project_user', 'password', 'localhost', 5432, 'test_project');
 
     context = ManagedContext(dataModel, persistentStore);
+    final authStorage = ManagedAuthDelegate<User>(context);
+    authServer = AuthServer(authStorage);
   }
 
   /// Construct the request channel.
@@ -32,7 +38,14 @@ class TestProjectChannel extends ApplicationChannel {
   Controller get entryPoint {
     final router = Router();
 
-    router.route("/register").link(() => UserController(context));
+    router.route('/auth/token').link(() => AuthController(authServer));
+
+    router
+        .route('/register')
+        .link(() => RegisterController(context, authServer));
+
+    router.route('/drawings/[:id]').link(() => DrawingsController(context));
+
     return router;
   }
 }
